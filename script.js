@@ -1,40 +1,95 @@
+/**
+ * Barcelona Mobility App - Bicing Inteligente
+ * Versión: Perfecta 1.0
+ */
+
 async function obtenerBicing() {
     const contenedor = document.getElementById('lista-estaciones');
-    if (!contenedor) return console.warn('No se encontró el contenedor lista-estaciones');
-    contenedor.innerHTML = "Localizando tu posición...";
+    if (!contenedor) return;
 
-    if (!('geolocation' in navigator)) {
-        contenedor.innerHTML = "Tu navegador no soporta geolocalización.";
+    contenedor.innerHTML = "<p style='color: blue;'>📍 Activando GPS y buscando estaciones...</p>";
+
+    // 1. Verificamos si el navegador tiene GPS
+    if (!navigator.geolocation) {
+        contenedor.innerHTML = "❌ Tu móvil no permite geolocalización.";
         return;
     }
 
-    const opciones = {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-    };
-
+    // 2. Pedimos la posición actual
     navigator.geolocation.getCurrentPosition(async (posicion) => {
-        const latUsuario = posicion.coords.latitude;
-        const lonUsuario = posicion.coords.longitude;
-
-        contenedor.innerHTML = "Buscando estaciones cercanas...";
+        const latUser = posicion.coords.latitude;
+        const lonUser = posicion.coords.longitude;
 
         try {
+            // 3. Llamada a la API de Bicing
             const respuesta = await fetch('https://api.citybik.es/v2/networks/bicing');
-            if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
-            const datos = await respuesta.json();
+            const data = await respuesta.json();
+            const estacionesOriginales = data.network.stations;
 
-            if (!datos.network || !Array.isArray(datos.network.stations)) {
-                contenedor.innerHTML = "No se encontraron estaciones en la respuesta.";
-                return;
-            }
-
-            let estaciones = datos.network.stations.map(estacion => {
-                const d = calcularDistancia(latUsuario, lonUsuario, estacion.latitude, estacion.longitude);
-                return { ...estacion, distancia: d };
+            // 4. Procesamos y ordenamos por distancia
+            let estacionesProcesadas = estacionesOriginales.map(est => {
+                const dist = calcularDistancia(latUser, lonUser, est.latitude, est.longitude);
+                return { ...est, distancia: dist };
             });
 
+            estacionesProcesadas.sort((a, b) => a.distancia - b.distancia);
+
+            // 5. Dibujamos los resultados (Top 5 más cercanas)
+            contenedor.innerHTML = ""; // Limpiar mensaje de carga
+            
+            estacionesProcesadas.slice(0, 5).forEach(est => {
+                // Lógica para detectar e-bikes (distintos campos posibles)
+                const extra = est.extra || {};
+                const ebikes = extra.ebikes ?? extra.electric_bikes ?? 0;
+                const totalBicis = est.free_bikes ?? 0;
+                const mecanicas = Math.max(0, totalBicis - ebikes);
+
+                const card = document.createElement('div');
+                card.style.cssText = "background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:10px; border-left: 5px solid #e30613; text-align:left; box-shadow: 0 2px 5px rgba(0,0,0,0.1);";
+                
+                card.innerHTML = `
+                    <strong style="font-size:1.1em;">📍 ${est.name}</strong><br>
+                    <span style="color:#666;">📏 A ${formatDist(est.distancia)} de ti</span><br>
+                    <div style="margin-top:8px;">
+                        <span style="background:#ffeded; padding:3px 8px; border-radius:5px;">⚡ <b>${ebikes}</b> Eléctricas</span>
+                        <span style="background:#eee; padding:3px 8px; border-radius:5px; margin-left:5px;">⚙️ <b>${mecanicas}</b> Mecánicas</span>
+                    </div>
+                    <div style="margin-top:8px; font-size:0.9em;">
+                        🔓 <b>${est.empty_slots}</b> huecos libres
+                    </div>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${est.latitude},${est.longitude}&travelmode=walking" 
+                       target="_blank" 
+                       style="display:inline-block; margin-top:10px; color:#007bff; text-decoration:none; font-weight:bold;">
+                       🚶 Ir caminando →
+                    </a>
+                `;
+                contenedor.appendChild(card);
+            });
+
+        } catch (error) {
+            contenedor.innerHTML = "❌ Error al conectar con Bicing. Inténtalo de nuevo.";
+            console.error(error);
+        }
+
+    }, (err) => {
+        contenedor.innerHTML = "⚠️ Error: Debes permitir el acceso al GPS para ver lo que tienes cerca.";
+    }, { enableHighAccuracy: true });
+}
+
+// Función matemática para distancias (Haversine)
+function calcularDistancia(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+function formatDist(km) {
+    return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
+}
             estaciones.sort((a, b) => a.distancia - b.distancia);
 
             contenedor.innerHTML = "";
