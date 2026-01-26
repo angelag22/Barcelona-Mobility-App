@@ -8,10 +8,9 @@ async function obtenerBicing() {
         return;
     }
 
-    // Opciones para getCurrentPosition
     const opciones = {
         enableHighAccuracy: true,
-        timeout: 10000, // 10s
+        timeout: 10000,
         maximumAge: 0
     };
 
@@ -31,16 +30,13 @@ async function obtenerBicing() {
                 return;
             }
 
-            // Calcular la distancia para CADA estación
             let estaciones = datos.network.stations.map(estacion => {
                 const d = calcularDistancia(latUsuario, lonUsuario, estacion.latitude, estacion.longitude);
                 return { ...estacion, distancia: d };
             });
 
-            // Ordenar de la más cercana a la más lejana
             estaciones.sort((a, b) => a.distancia - b.distancia);
 
-            // Mostrar las 3 más cercanas
             contenedor.innerHTML = "";
             const top = estaciones.slice(0, 3);
             if (top.length === 0) {
@@ -55,17 +51,28 @@ async function obtenerBicing() {
                 const title = document.createElement('strong');
                 title.textContent = `📍 ${estacion.name}`;
                 wrapper.appendChild(title);
+                wrapper.appendChild(document.createElement('br'));
 
-                const br = document.createElement('br');
-                wrapper.appendChild(br);
-
-                const distText = document.createElement('div');
                 const metros = estacion.distancia * 1000;
+                const distText = document.createElement('div');
                 distText.textContent = `Distancia: ${formatDist(metros)}`;
                 wrapper.appendChild(distText);
 
+                // Intentar detectar bicis eléctricas en "extra"
+                const extra = estacion.extra || {};
+                const ebikesField = (typeof extra.ebikes === 'number') ? extra.ebikes
+                                  : (typeof extra.electric_bikes === 'number' ? extra.electric_bikes : null);
+
                 const bikes = document.createElement('div');
-                bikes.textContent = `🚲 Bicis: ${estacion.free_bikes} | 🔓 Huecos: ${estacion.empty_slots}`;
+                if (ebikesField !== null && typeof estacion.free_bikes === 'number') {
+                    const eb = ebikesField;
+                    const total = estacion.free_bikes;
+                    const mec = Math.max(0, total - eb);
+                    bikes.textContent = `🚲 Eléctricas: ${eb} | ⚙️ Mecánicas: ${mec} (Total: ${total}) | 🔓 Huecos: ${estacion.empty_slots}`;
+                } else {
+                    // fallback: sólo total si no hay campo separado
+                    bikes.textContent = `🚲 Bicis: ${estacion.free_bikes} | 🔓 Huecos: ${estacion.empty_slots}`;
+                }
                 wrapper.appendChild(bikes);
 
                 const hr = document.createElement('hr');
@@ -73,8 +80,8 @@ async function obtenerBicing() {
                 hr.style.height = '1px';
                 hr.style.background = '#eee';
                 hr.style.margin = '8px 0';
-
                 wrapper.appendChild(hr);
+
                 contenedor.appendChild(wrapper);
             });
 
@@ -100,9 +107,9 @@ async function obtenerBicing() {
     }, opciones);
 }
 
-// Función matemática para calcular distancia entre dos coordenadas (Devuelve km)
+// Devuelve km
 function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radio de la Tierra en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -113,9 +120,6 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
 }
 
 function formatDist(metros) {
-    if (metros < 1000) {
-        return `${Math.round(metros)} metros`;
-    } else {
-        return `${(metros / 1000).toFixed(1)} km`;
-    }
-            }
+    if (metros < 1000) return `${Math.round(metros)} metros`;
+    return `${(metros / 1000).toFixed(1)} km`;
+}
