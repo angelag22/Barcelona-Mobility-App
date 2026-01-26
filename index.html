@@ -47,12 +47,11 @@
     <button onclick="obtenerBicing()" style="padding: 10px 20px; background: #e30613; color: white; border: none; border-radius: 5px;">
         🚲 Consultar Bicing cercano
     </button>
-    <div id="lista-estaciones" style="margin-top: 15px; font-family: sans-serif;">
-        </div>
+    <div id="lista-estaciones" style="margin-top: 15px; font-family: sans-serif;"></div>
     </div>
     <div class="card">
         <h2>🔍 OTRO DESTINO</h2>
-        <input type="text" id="destinoLibre" placeholder="Ej: Plaza Cataluña" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box; margin-bottom:10px;">
+        <input type="text" id="destinoLibre" placeholder="Ej: Plaza Cataluña" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box; margin-bottom:10px;[...]"
         <div class="btn-grid">
             <button onclick="irLibre('transit')" class="btn btn-metro" style="background:#555">🚇 PÚBLICO</button>
             <button onclick="irLibre('bicycling')" class="btn btn-bici" style="grid-column: span 1;">🚲 BICI</button>
@@ -76,5 +75,7 @@
             ir(val, modo);
         }
     </script>
+
+    <script src="script.js"></script>
 </body>
 </html>
