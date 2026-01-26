@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Rutas - BCN</title>
+    <style>
+        :root { --metro: #e4012c; --bus: #ff8c00; --bici: #2ecc71; --dark: #1a1a2e; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .card { background: white; border-radius: 15px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-top: 5px solid var(--dark); }
+        h2 { margin: 0 0 15px 0; font-size: 1.1rem; color: #333; text-transform: uppercase; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; text-align: center; text-decoration: none; font-size: 0.9rem; }
+        .btn-metro { background: var(--metro); }
+        .btn-bus { background: var(--bus); }
+        .btn-bici { background: var(--bici); color: #1a1a2e; grid-column: span 2; }
+        .label { font-size: 0.8rem; font-weight: bold; color: #777; display: block; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align:center; color:var(--dark);">🚉 Mis Rutas BCN</h1>
+
+    <div class="card" style="border-top-color: var(--metro);">
+        <h2>🍎 MERCABARNA</h2>
+        <span class="label">Elegir modo de transporte:</span>
+        <div class="btn-grid">
+            <button onclick="ir('Mercabarna', 'transit', 'subway')" class="btn btn-metro">🚇 METRO</button>
+            <button onclick="ir('Mercabarna', 'transit', 'bus')" class="btn btn-bus">🚌 BUS</button>
+            <button onclick="ir('Mercabarna', 'bicycling')" class="btn btn-bici">🚲 IR EN BICI</button>
+        </div>
+    </div>
+
+    <div class="card" style="border-top-color: var(--bus);">
+        <h2>🏢 EUROPA | FIRA</h2>
+        <span class="label">Elegir modo de transporte:</span>
+        <div class="btn-grid">
+            <button onclick="ir('Europa Fira', 'transit', 'subway')" class="btn btn-metro">🚇 METRO / FGC</button>
+            <button onclick="ir('Europa Fira', 'transit', 'bus')" class="btn btn-bus">🚌 BUS</button>
+            <button onclick="ir('Europa Fira', 'bicycling')" class="btn btn-bici">🚲 IR EN BICI</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🔍 OTRO DESTINO</h2>
+        <input type="text" id="destinoLibre" placeholder="Ej: Plaza Cataluña" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box; margin-bottom:10px;">
+        <div class="btn-grid">
+            <button onclick="irLibre('transit')" class="btn btn-metro" style="background:#555">🚇 PÚBLICO</button>
+            <button onclick="irLibre('bicycling')" class="btn btn-bici" style="grid-column: span 1;">🚲 BICI</button>
+        </div>
+    </div>
+
+    <script>
+        // Función para destinos fijos
+        function ir(destino, modo, submodo = '') {
+            let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino + " Barcelona")}&travelmode=${modo}`;
+            if (submodo) {
+                url += `&transit_mode=${submodo}`;
+            }
+            window.open(url, '_blank');
+        }
+
+        // Función para el buscador
+        function irLibre(modo) {
+            const val = document.getElementById('destinoLibre').value;
+            if (!val) return alert("Escribe un destino");
+            ir(val, modo);
+        }
+    </script>
+</body>
+</html>
