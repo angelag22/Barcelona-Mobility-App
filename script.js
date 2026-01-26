@@ -93,7 +93,7 @@ function formatDist(km) {
             estaciones.sort((a, b) => a.distancia - b.distancia);
 
             contenedor.innerHTML = "";
-            const top = estaciones.slice(0, 3);
+            const top = estaciones.slice(0, 5);
             if (top.length === 0) {
                 contenedor.innerHTML = "No hay estaciones disponibles.";
                 return;
