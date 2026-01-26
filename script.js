@@ -9,7 +9,6 @@ async function obtenerBicing() {
         return;
     }
 
-    // Pedimos la posición con alta precisión
     navigator.geolocation.getCurrentPosition(async (posicion) => {
         const latUser = posicion.coords.latitude;
         const lonUser = posicion.coords.longitude;
@@ -19,29 +18,41 @@ async function obtenerBicing() {
             const data = await respuesta.json();
             const estacionesOriginales = data.network.stations;
 
-            // Procesamos y calculamos distancias
             let estaciones = estacionesOriginales.map(est => {
                 const dist = calcularDistancia(latUser, lonUser, est.latitude, est.longitude);
                 return { ...est, distancia: dist };
             });
 
-            // Ordenamos: la más cercana primero
             estaciones.sort((a, b) => a.distancia - b.distancia);
 
-            contenedor.innerHTML = ""; // Limpiamos el cargando
+            contenedor.innerHTML = ""; // Limpiamos el texto de carga
 
-            // Mostramos las 10 más cercanas
-            estaciones.slice(0, 10).forEach(est => {
+            // --- BOTÓN DE PLEGAR (Diseño neutro para no alterar el tuyo) ---
+            const btnToggle = document.createElement('button');
+            btnToggle.innerHTML = "🔼 Plegar / Desplegar lista";
+            btnToggle.style.cssText = "width:100%; padding:10px; margin-bottom:15px; background:#444; color:white; border:none; border-radius:8px; font-weight:bold; font-family:sans-serif;";
+            
+            // Sub-contenedor que se oculta/muestra
+            const subContenedor = document.createElement('div');
+            
+            btnToggle.onclick = () => {
+                subContenedor.style.display = (subContenedor.style.display === "none") ? "block" : "none";
+                btnToggle.innerHTML = (subContenedor.style.display === "none") ? "🔽 Ver estaciones" : "🔼 Plegar lista";
+            };
+
+            contenedor.appendChild(btnToggle);
+            contenedor.appendChild(subContenedor);
+
+            // --- LIMITADO A 5 ESTACIONES ---
+            estaciones.slice(0, 5).forEach(est => {
                 const extra = est.extra || {};
-                
-                // --- AQUÍ ESTÁ EL TRUCO PARA LAS EBIKES ---
-                // Buscamos en todas las variantes posibles que envía la API
                 const ebikes = extra.ebikes ?? extra.electric_bikes ?? 0;
                 const total = est.free_bikes ?? 0;
                 const mec = Math.max(0, total - ebikes);
 
                 const card = document.createElement('div');
-                card.style.cssText = "background:white; padding:15px; border-radius:12px; margin-bottom:15px; border-left: 6px solid #e30613; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: sans-serif;";
+                // TU DISEÑO EXACTO
+                card.style.cssText = "background:white; padding:15px; border-radius:12px; margin-bottom:15px; border-left: 6px solid #e30613; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: sans-serif; text-align: left;";
                 
                 card.innerHTML = `
                     <div style="font-weight: bold; font-size: 1.1em; color: #333;">📍 ${est.name}</div>
@@ -60,7 +71,7 @@ async function obtenerBicing() {
                         </div>
                     </div>
 
-                    <div style="font-size: 0.9em; color: #555; border-top: 1px solid #eee; pt: 8px;">
+                    <div style="font-size: 0.9em; color: #555; border-top: 1px solid #eee; padding-top: 8px;">
                         🔓 <b>${est.empty_slots}</b> huecos libres para aparcar
                     </div>
 
@@ -70,20 +81,18 @@ async function obtenerBicing() {
                        🚶 Ver ruta caminando
                     </a>
                 `;
-                contenedor.appendChild(card);
+                subContenedor.appendChild(card);
             });
 
         } catch (error) {
-            contenedor.innerHTML = "❌ Error al conectar con el servidor de Bicing.";
-            console.error(error);
+            contenedor.innerHTML = "❌ Error al conectar con Bicing.";
         }
 
     }, (err) => {
-        contenedor.innerHTML = "⚠️ No puedo mostrar nada sin tu GPS. Activa la ubicación.";
+        contenedor.innerHTML = "⚠️ Activa el GPS para ver las estaciones.";
     }, { enableHighAccuracy: true });
 }
 
-// Cálculo de distancia precisa
 function calcularDistancia(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -94,7 +103,6 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 }
 
-// Formateador de distancia
 function formatDist(km) {
     if (km < 1) return Math.round(km * 1000) + " metros";
     return km.toFixed(1) + " km";
