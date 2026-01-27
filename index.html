@@ -1,100 +1,302 @@
-async function obtenerBicing() {
-    const contenedor = document.getElementById('lista-estaciones');
-    if (!contenedor) return;
-
-    contenedor.innerHTML = "<p style='color: #e30613; font-weight: bold;'>📍 Buscando bicis cerca de ti...</p>";
-
-    if (!navigator.geolocation) {
-        contenedor.innerHTML = "❌ GPS no disponible.";
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async (posicion) => {
-        const latUser = posicion.coords.latitude;
-        const lonUser = posicion.coords.longitude;
-
-        try {
-            const respuesta = await fetch('https://api.citybik.es/v2/networks/bicing');
-            const data = await respuesta.json();
-            const estacionesOriginales = data.network.stations;
-
-            let estaciones = estacionesOriginales.map(est => {
-                const dist = calcularDistancia(latUser, lonUser, est.latitude, est.longitude);
-                return { ...est, distancia: dist };
-            });
-
-            estaciones.sort((a, b) => a.distancia - b.distancia);
-            contenedor.innerHTML = ""; 
-
-            // --- BOTÓN PLEGAR/DESPLEGAR ---
-            const btnToggle = document.createElement('button');
-            btnToggle.innerHTML = "🔼 Plegar lista de estaciones";
-            btnToggle.style.cssText = "width:100%; padding:12px; margin-bottom:15px; background:#1a1a2e; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;";
-            
-            const subContenedor = document.createElement('div');
-            
-            btnToggle.onclick = () => {
-                const oculto = subContenedor.style.display === "none";
-                subContenedor.style.display = oculto ? "block" : "none";
-                btnToggle.innerHTML = oculto ? "🔼 Plegar lista" : "🔽 Ver 5 estaciones cercanas";
-            };
-
-            contenedor.appendChild(btnToggle);
-            contenedor.appendChild(subContenedor);
-
-            // --- LIMITADO A 5 ESTACIONES ---
-            estaciones.slice(0, 5).forEach(est => {
-                const extra = est.extra || {};
-                const ebikes = extra.ebikes ?? extra.electric_bikes ?? 0;
-                const total = est.free_bikes ?? 0;
-                const mec = Math.max(0, total - ebikes);
-
-                const card = document.createElement('div');
-                // MANTENEMOS TU DISEÑO ABSOLUTAMENTE IGUAL
-                card.style.cssText = "background:white; padding:15px; border-radius:12px; margin-bottom:15px; border-left: 6px solid #e30613; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: sans-serif; text-align: left;";
-                
-                card.innerHTML = `
-                    <div style="font-weight: bold; font-size: 1.1em; color: #333;">📍 ${est.name}</div>
-                    <div style="color: #666; font-size: 0.9em; margin-bottom: 8px;">📏 A ${formatDist(est.distancia)} de ti</div>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-                        <div style="background: #fff0f0; padding: 5px 10px; border-radius: 6px; flex: 1; text-align: center;">
-                            <span style="font-size: 1.1em;">⚡</span><br>
-                            <b style="color: #e30613;">${ebikes}</b><br><small>Elec.</small>
-                        </div>
-                        <div style="background: #f0f0f0; padding: 5px 10px; border-radius: 6px; flex: 1; text-align: center;">
-                            <span style="font-size: 1.1em;">⚙️</span><br>
-                            <b style="color: #444;">${mec}</b><br><small>Mec.</small>
-                        </div>
-                    </div>
-
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=${est.latitude},${est.longitude}&travelmode=walking" 
-                       target="_blank" 
-                       style="display: block; text-align: center; margin-top: 10px; background: #007bff; color: white; text-decoration: none; padding: 8px; border-radius: 8px; font-size: 0.9rem; font-weight: bold;">
-                       🚶 Ir caminando
-                    </a>
-                `;
-                subContenedor.appendChild(card);
-            });
-
-        } catch (error) {
-            contenedor.innerHTML = "❌ Error de conexión.";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BCN Movilidad PRO</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        :root { 
+            --metro: #e4012c; 
+            --bus: #ff8c00; 
+            --bici: #2ecc71; 
+            --dark: #1a1a2e; 
+            --bg: #f4f7f6;
+            --smou-red: #e30613;
         }
-    }, (err) => {
-        contenedor.innerHTML = "⚠️ Activa el GPS.";
-    }, { enableHighAccuracy: true });
-}
+        
+        body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; -webkit-tap-highlight-color: transparent; }
+        
+        h1 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 1.5rem; letter-spacing: -0.5px; }
+        
+        /* TARJETAS */
+        .card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        h2 { margin: 0 0 15px 0; font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        /* BOTONES */
+        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; color: white; width: 100%; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; margin-bottom: 10px; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-metro { background: var(--metro); }
+        .btn-bus { background: var(--bus); }
+        .btn-bici-fijo { background: var(--bici); color: var(--dark); }
+        
+        /* SECCIÓN BICING */
+        .btn-main-action { background: var(--smou-red); font-size: 1.1rem; box-shadow: 0 4px 10px rgba(227, 6, 19, 0.3); }
+        
+        .btn-toggle { background: #555; font-size: 0.85rem; padding: 10px; margin-top: 10px; }
+        
+        /* CONTENEDOR RESULTADOS */
+        #resultados-bicing { display: none; margin-top: 15px; }
+        
+        /* LISTA DE ESTACIONES */
+        #lista-container { display: block; /* Visible por defecto tras buscar */ }
+        
+        .estacion-card { 
+            background: #fff; 
+            border: 1px solid #eee; 
+            padding: 12px; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            border-left: 5px solid var(--smou-red);
+        }
+        
+        .info-row { display: flex; justify-content: space-between; margin-top: 8px; gap: 10px; }
+        .badge { flex: 1; text-align: center; padding: 5px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }
+        .badge-elec { background: #ffebee; color: #c62828; }
+        .badge-mec { background: #f5f5f5; color: #616161; }
+        
+        .btn-walk { display: block; text-align: center; background: #007bff; color: white; text-decoration: none; padding: 8px; border-radius: 6px; margin-top: 8px; font-weight: bold; font-size: 0.9rem; }
 
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-}
+        /* MAPA */
+        #contenedor-mapa { display: none; height: 350px; width: 100%; border-radius: 12px; margin-top: 15px; border: 2px solid var(--smou-red); overflow: hidden; }
+        #map { height: 100%; width: 100%; }
+        
+        /* INPUT BUSCADOR */
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; margin-bottom: 10px; }
+        
+        /* Loader */
+        .loader { width: 18px; height: 18px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
 
-function formatDist(km) {
-    return km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1) + " km";
-}
+    <h1>🚉 BCN Movilidad</h1>
+
+    <div class="card" style="border-top: 5px solid #e30613;">
+        <h2>🚲 Bicing Cercano</h2>
+        
+        <button id="btn-buscar" onclick="iniciarBusqueda()" class="btn btn-main-action">
+            🔍 Buscar Estaciones Cercanas
+        </button>
+        
+        <div id="msg-estado" style="text-align:center; color:#666; margin: 10px 0;"></div>
+
+        <div id="resultados-bicing">
+            
+            <button onclick="toggleLista()" id="btn-toggle-lista" class="btn btn-toggle" style="background: #333;">
+                🔼 Ocultar lista (Ver solo mapa)
+            </button>
+
+            <div id="lista-container"></div>
+            
+            <button onclick="toggleMapa()" id="btn-toggle-mapa" class="btn btn-toggle" style="background: #007bff;">
+                🗺️ Mostrar/Ocultar Mapa
+            </button>
+            
+            <div id="contenedor-mapa">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-top: 5px solid var(--metro);">
+        <h2>🍎 Mercabarna</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button onclick="ir('Mercabarna', 'transit')" class="btn btn-metro">🚇 Metro/Bus</button>
+            <button onclick="ir('Mercabarna', 'bicycling')" class="btn btn-bici-fijo">🚲 Bici</button>
+        </div>
+    </div>
+
+    <div class="card" style="border-top: 5px solid var(--bus);">
+        <h2>🏢 Europa | Fira</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button onclick="ir('Europa Fira', 'transit')" class="btn btn-metro">🚇 FGC/Metro</button>
+            <button onclick="ir('Europa Fira', 'bicycling')" class="btn btn-bici-fijo">🚲 Bici</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🔍 Otro Destino</h2>
+        <input type="text" id="destinoLibre" placeholder="Ej: Sagrada Familia">
+        <button onclick="irLibre()" class="btn btn-metro" style="background:#444;">🚀 Ir ahora</button>
+    </div>
+
+    <script>
+        // VARIABLES GLOBALES
+        let mapa = null;
+        let mapInitialized = false;
+
+        // --- FUNCIÓN PRINCIPAL: BUSCAR ---
+        async function iniciarBusqueda() {
+            const btn = document.getElementById('btn-buscar');
+            const msg = document.getElementById('msg-estado');
+            const bloqueResultados = document.getElementById('resultados-bicing');
+            const listaContainer = document.getElementById('lista-container');
+
+            // Reset visual
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> Buscando GPS...';
+            msg.innerHTML = "📡 Solicitando permiso de ubicación...";
+            bloqueResultados.style.display = "none";
+
+            if (!navigator.geolocation) {
+                msg.innerHTML = "❌ Tu dispositivo no tiene GPS.";
+                btn.innerHTML = "🔍 Reintentar";
+                btn.disabled = false;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                
+                msg.innerHTML = "🚴 Descargando datos de Bicing en tiempo real...";
+
+                try {
+                    // API Bicing
+                    const response = await fetch('https://api.citybik.es/v2/networks/bicing');
+                    const data = await response.json();
+                    
+                    // Calcular distancias
+                    let estaciones = data.network.stations.map(est => ({
+                        ...est,
+                        distancia: calcularDistancia(lat, lon, est.latitude, est.longitude)
+                    }));
+
+                    // Ordenar y coger top 5
+                    estaciones.sort((a, b) => a.distancia - b.distancia);
+                    const top5 = estaciones.slice(0, 5);
+
+                    // GENERAR HTML DE LA LISTA
+                    listaContainer.innerHTML = ""; // Limpiar anterior
+                    top5.forEach(est => {
+                        const extra = est.extra || {};
+                        const ebikes = extra.ebikes ?? extra.electric_bikes ?? 0; // Bicis eléctricas
+                        const mecanicas = Math.max(0, est.free_bikes - ebikes);   // Bicis mecánicas
+
+                        // Enlace corregido a Google Maps (Sintaxis segura)
+                        const googleLink = `https://www.google.com/maps/dir/?api=1&destination=${est.latitude},${est.longitude}&travelmode=walking`;
+
+                        const div = document.createElement('div');
+                        div.className = "estacion-card";
+                        div.innerHTML = `
+                            <div style="font-weight:bold; font-size:1.1rem;">📍 ${est.name}</div>
+                            <div style="color:#666; margin-bottom:5px;">📏 A <b>${Math.round(est.distancia * 1000)} metros</b></div>
+                            
+                            <div class="info-row">
+                                <div class="badge badge-elec">⚡ ${ebikes} Eléctricas</div>
+                                <div class="badge badge-mec">⚙️ ${mecanicas} Mecánicas</div>
+                            </div>
+                            
+                            <a href="${googleLink}" target="_blank" class="btn-walk">🚶 Ir caminando</a>
+                        `;
+                        listaContainer.appendChild(div);
+                    });
+
+                    // ÉXITO: MOSTRAR TODO
+                    msg.innerHTML = "";
+                    btn.innerHTML = "🔄 Actualizar Datos";
+                    btn.disabled = false;
+                    bloqueResultados.style.display = "block";
+
+                    // Inicializar mapa (oculto por defecto pero preparado)
+                    prepararMapa(lat, lon, top5);
+
+                } catch (error) {
+                    console.error(error);
+                    msg.innerHTML = "❌ Error de conexión con Bicing API.";
+                    btn.innerHTML = "🔍 Reintentar";
+                    btn.disabled = false;
+                }
+
+            }, (err) => {
+                // Errores de GPS
+                msg.innerHTML = "⚠️ No se pudo obtener ubicación. Activa el GPS y permite el acceso.";
+                btn.innerHTML = "🔍 Reintentar";
+                btn.disabled = false;
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        }
+
+        // --- FUNCIÓN PLEGABLE LISTA ---
+        function toggleLista() {
+            const lista = document.getElementById('lista-container');
+            const btn = document.getElementById('btn-toggle-lista');
+            
+            if (lista.style.display === "none") {
+                lista.style.display = "block";
+                btn.innerHTML = "🔼 Ocultar lista (Ver solo mapa)";
+            } else {
+                lista.style.display = "none";
+                btn.innerHTML = "🔽 Ver lista de estaciones";
+            }
+        }
+
+        // --- FUNCIÓN MAPA ---
+        function toggleMapa() {
+            const container = document.getElementById('contenedor-mapa');
+            const btn = document.getElementById('btn-toggle-mapa');
+            
+            if (container.style.display === "none" || container.style.display === "") {
+                container.style.display = "block";
+                btn.innerHTML = "🗺️ Ocultar Mapa";
+                // Pequeño retardo para que Leaflet calcule bien el tamaño al aparecer
+                setTimeout(() => { if(mapa) mapa.invalidateSize(); }, 100);
+            } else {
+                container.style.display = "none";
+                btn.innerHTML = "🗺️ Mostrar Mapa";
+            }
+        }
+
+        function prepararMapa(lat, lon, estaciones) {
+            if (mapa) {
+                mapa.remove(); // Limpiar mapa anterior si existe
+            }
+            
+            mapa = L.map('map').setView([lat, lon], 15);
+            
+            // Capa visual limpia
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(mapa);
+            
+            // TU Ubicación
+            L.circleMarker([lat, lon], {
+                radius: 9, fillColor: "#2196F3", color: "white", weight: 3, fillOpacity: 1
+            }).addTo(mapa).bindPopup("<b>Estás aquí</b>").openPopup();
+            
+            // Estaciones
+            estaciones.forEach(est => {
+                L.circleMarker([est.latitude, est.longitude], {
+                    radius: 8, fillColor: "#e30613", color: "white", weight: 2, fillOpacity: 0.9
+                }).addTo(mapa).bindPopup(`<b>${est.name}</b><br>Total bicis: ${est.free_bikes}`);
+            });
+        }
+
+        // --- CÁLCULOS Y RUTAS ---
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function ir(destino, modo) {
+            // URL OFICIAL Y SEGURA DE GOOGLE MAPS
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino + " Barcelona")}&travelmode=${modo}`;
+            window.open(url, '_blank');
+        }
+
+        function irLibre() {
+            const val = document.getElementById('destinoLibre').value;
+            if (val) ir(val, 'transit');
+        }
+    </script>
+</body>
+</html>
