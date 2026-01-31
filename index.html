@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BCN Mobility PRO - Ultimate</title>
+    <title>BCN Mobility PRO - Ángel Edition</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,146 +13,134 @@
         :root { 
             --bicing-red: #e30613; 
             --bicing-blue: #00a1df; 
-            --bg: #f8f9fa;
-            --card: #ffffff;
-            --text: #1a1a1a;
-            --btn-sec: #f1f1f1;
-            --accent-yellow: #ffcc00;
-            --accent-green: #28a745;
-            --accent-red: #dc3545;
+            --bg: #f8f9fa; --card: #ffffff; --text: #1a1a1a; --btn-sec: #f1f1f1;
         }
-
         body.dark-mode {
-            --bg: #0f0f0f;
-            --card: #1a1a1a;
-            --text: #ffffff;
-            --btn-sec: #2d2d2d;
+            --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; --btn-sec: #2d2d2d;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 110px; color: var(--text); transition: background 0.3s; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 110px; color: var(--text); transition: 0.3s; }
         
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
 
-        .card { 
-            background: var(--card); border-radius: 20px; padding: 18px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; 
-        }
-
-        /* NAVEGACIÓN */
         nav { display: flex; gap: 10px; margin-bottom: 15px; }
-        .nav-link { padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 700; background: var(--btn-sec); color: var(--text); border: none; }
+        .nav-link { padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; background: var(--btn-sec); color: var(--text); border: none; flex: 1; text-align: center; }
         .nav-link.active { background: var(--bicing-red); color: white; }
 
-        .btn-main {
-            background: var(--bicing-red); color: white; border: none; width: 100%; padding: 15px;
-            border-radius: 15px; font-size: 1rem; font-weight: 800; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        .btn-main { background: var(--bicing-red); color: white; border: none; width: 100%; padding: 16px; border-radius: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-        .dest-btn {
-            background: var(--btn-sec); color: var(--text); border: none; padding: 15px;
-            border-radius: 12px; font-weight: 700; display: flex; flex-direction: column; 
-            align-items: center; gap: 5px; cursor: pointer; transition: 0.2s;
-        }
-        .dest-btn i { font-size: 1.5rem; }
+        /* ESTACIONES */
+        .station-card { background: var(--card); border: 1px solid rgba(128,128,128,0.1); border-radius: 16px; padding: 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 6px 12px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; color: white; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-elec { background: var(--bicing-blue); }
+        .badge-mech { background: var(--bicing-red); }
 
-        /* BUSCADOR Y FAVORITOS */
-        .search-container { display: flex; gap: 8px; margin-top: 15px; }
-        .search-container input { 
-            flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; 
-            background: var(--card); color: var(--text);
-        }
-        .btn-fav { 
-            background: var(--accent-yellow); color: #000; border: none; padding: 12px; 
-            border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s;
-        }
-        .btn-fav.added { background: var(--accent-green); color: white; }
-        
-        .fav-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: var(--btn-sec); padding: 10px; border-radius: 10px; margin-top: 8px;
-        }
-        .btn-delete { background: var(--accent-red); color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+        /* FAVORITOS VERTICAL */
+        .fav-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .fav-card { background: var(--card); border: 1px solid rgba(128,128,128,0.2); border-radius: 15px; padding: 15px; position: relative; }
+        .fav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .transport-modes { display: flex; gap: 8px; }
+        .mode-btn { background: var(--btn-sec); border: none; padding: 8px 12px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .mode-btn:hover { background: var(--bicing-red); color: white; }
 
-        /* MAPA */
-        #map-container { height: 0; overflow: hidden; transition: 0.4s ease-out; border-radius: 15px; margin-top: 10px; }
-        #map-container.open { height: 250px; border: 1px solid #ddd; }
+        /* BUSCADOR */
+        .search-box { position: relative; margin-top: 10px; }
+        .search-box input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; background: var(--card); color: var(--text); }
+        .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; max-height: 200px; overflow-y: auto; display: none; }
+        .suggestion-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+
+        #map-container { height: 0; overflow: hidden; transition: 0.4s; border-radius: 15px; }
+        #map-container.open { height: 280px; margin-top: 15px; border: 1px solid #ddd; }
         #map { width: 100%; height: 100%; }
 
-        /* SECCIONES */
         .section { display: none; }
         .section.active { display: block; }
-
-        .theme-toggle { background: var(--card); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.1rem; }
+        .theme-toggle { background: var(--card); border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        .spotify-player { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 92%; background: rgba(20,20,20,0.9); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; z-index: 9999; color: white; }
     </style>
 </head>
 <body onclick="iniciarAudioInit()">
 
     <header>
-        <h1 style="font-family:'Montserrat'; margin:0; font-size:1.2rem;">BCN Mobility <span style="color:var(--bicing-red)">PRO</span></h1>
+        <h1 style="font-family:'Montserrat'; margin:0; font-size:1.3rem;">BCN Mobility <span style="color:var(--bicing-red)">PRO</span></h1>
         <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙</button>
     </header>
 
     <nav>
-        <div class="nav-link active" onclick="showTab('inicio', this)">Inicio</div>
-        <div class="nav-link" onclick="showTab('sobremi', this)">Sobre Mí</div>
+        <button class="nav-link active" onclick="showTab('inicio', this)">Inicio</button>
+        <button class="nav-link" onclick="showTab('sobremi', this)">Acerca de</button>
     </nav>
 
     <div id="inicio" class="section active">
         <div class="card">
-            <h2 style="margin:0 0 12px 0; font-size:1rem;">🚲 Bicing Cercano</h2>
+            <h2 style="margin:0 0 15px 0; font-size:1.1rem; font-family:'Montserrat'">🚲 Bicing Live</h2>
             <button id="btn-buscar" class="btn-main" onclick="buscarBicing()">🔍 Buscar Estaciones</button>
             <div id="resultados-bicing" style="display:none;">
                 <div id="lista-estaciones"></div>
-                <button id="btn-map-toggle" class="btn-main" style="background:#444; margin-top:10px;" onclick="toggleMap()">🗺️ Ver en Mapa</button>
+                <button class="btn-main" style="background:#444; margin-top:12px;" onclick="toggleMap()">🗺️ Ver Mapa Interactivo</button>
                 <div id="map-container"><div id="map"></div></div>
             </div>
         </div>
 
         <div class="card">
-            <h2 style="margin:0 0 15px 0; font-size:1rem;">⭐ Rutas Favoritas</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" id="grid-favoritos">
-                <button class="dest-btn" onclick="ir('Mercabarna', 'transit')"><i>💼</i> Mercabarna</button>
-                <button class="dest-btn" onclick="ir('Fira Barcelona Gran Via', 'transit')"><i>🏢</i> Fira</button>
+            <h2 style="margin:0 0 10px 0; font-size:1.1rem; font-family:'Montserrat'">⭐ Mis Rutas Favoritas</h2>
+            
+            <div class="search-box">
+                <input type="text" id="input-busqueda" placeholder="Buscar lugar real (Ej: Camp Nou)..." oninput="buscarLugares(this.value)">
+                <div id="sugerencias" class="suggestions"></div>
             </div>
 
-            <div class="search-container">
-                <input type="text" id="input-ruta" placeholder="Nombre de nueva ruta...">
-                <button id="btn-add-fav" class="btn-fav" onclick="addFavorito()">Añadir Favorita</button>
-            </div>
-            
-            <div id="lista-favoritos-extra" style="margin-top:15px;"></div>
+            <button id="btn-add-fav" class="btn-main" style="background:var(--accent-yellow, #ffcc00); color:black; margin-top:10px; display:none;" onclick="guardarLugarSeleccionado()">Añadir a Favoritos</button>
+
+            <div class="fav-list" id="lista-favoritos">
+                </div>
         </div>
     </div>
 
     <div id="sobremi" class="section">
-        <div class="card">
-            <h2 style="color:var(--bicing-red)">Acerca de BCN Mobility PRO</h2>
-            <p><strong>BCN Mobility PRO</strong> es la herramienta definitiva para el ciudadano moderno en Barcelona.</p>
-            <p>Esta aplicación ha sido diseñada para optimizar tus trayectos diarios, permitiéndote consultar estaciones de <b>Bicing</b> en tiempo real con iconos personalizados y gestionar tus rutas de trabajo (<b>Mercabarna</b>) o eventos (<b>Fira</b>) con un solo toque.</p>
-            <ul style="padding-left: 20px; line-height: 1.6;">
-                <li>Mapa con iconos de bici roja profesionales.</li>
-                <li>Modo Noche para ahorro de batería.</li>
-                <li>Buscador de rutas personalizables.</li>
-                <li>Persistencia de datos local.</li>
-            </ul>
-            <p style="font-size: 0.8rem; color: #888; margin-top: 20px;">Versión 2.0 - Powered by Urban Data BCN</p>
+        <div class="card" style="line-height:1.6">
+            <h2 style="color:var(--bicing-red); font-family:'Montserrat'">Acerca de</h2>
+            <p><strong>BCN Mobility PRO</strong> ha sido desarrollada por <strong>Ángel</strong>, un joven de 24 años de Barcelona, apasionado por las nuevas tecnologías y la optimización de la vida urbana.</p>
+            <p>Esta herramienta utiliza datos en tiempo real para ofrecer la mejor experiencia de movilidad en la ciudad condal.</p>
+            <hr style="opacity:0.1">
+            <p style="font-size:0.9rem; color:#888;">© 2024 Ángel Dev - Barcelona Tech.</p>
         </div>
     </div>
+
+    <div class="spotify-player">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:35px; height:35px; border-radius:50%; background:linear-gradient(45deg, #e30613, #00a1df);"></div>
+            <div style="font-size:0.75rem;"><b>Lo-Fi BCN</b><br><span style="opacity:0.6">Urban Mix</span></div>
+        </div>
+        <button onclick="toggleMusic()" id="btn-play" style="background:white; border:none; width:30px; height:30px; border-radius:50%;">▶</button>
+    </div>
+
+    <audio id="music-track" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
+    <audio id="click-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
 
     <script>
         let map = null;
         let darkMode = false;
-        let favoritos = JSON.parse(localStorage.getItem('fav_routes')) || [];
+        let audioIniciado = false;
+        let lugarTemporal = null;
 
-        // ICONO BICI ROJA (Corregido: Antes era una "moto amarilla" según el usuario)
-        const redBikeIcon = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png', // Bici Roja
+        // Cargar favoritos o defaults
+        const defaultFavs = [
+            { nombre: "Mercabarna", lat: 41.334, lon: 2.119 },
+            { nombre: "Fira Barcelona", lat: 41.354, lon: 2.127 }
+        ];
+        let favoritos = JSON.parse(localStorage.getItem('bcn_favs_angel')) || defaultFavs;
+
+        const bikeIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png',
             iconSize: [35, 35], iconAnchor: [17, 35], popupAnchor: [0, -35]
         });
 
-        function feedback(vibrate = 15) { if (navigator.vibrate) navigator.vibrate(vibrate); }
+        function feedback(v = 15) { if(navigator.vibrate) navigator.vibrate(v); }
+        function iniciarAudioInit() { if(!audioIniciado) { toggleMusic(); audioIniciado = true; } }
 
         function showTab(id, el) {
             feedback(10);
@@ -166,77 +154,89 @@
             darkMode = !darkMode;
             document.body.classList.toggle('dark-mode');
             document.getElementById('theme-btn').innerHTML = darkMode ? '☀️' : '🌙';
-            if (map) {
-                const layer = darkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-                L.tileLayer(layer).addTo(map);
-            }
+            feedback(20);
         }
 
-        function toggleMap() {
-            const container = document.getElementById('map-container');
-            container.classList.toggle('open');
-            setTimeout(() => { if(map) map.invalidateSize(); }, 400);
-        }
-
-        function ir(dest, modo) {
-            feedback(30);
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=${modo}`, '_blank');
-        }
-
-        // --- LÓGICA DE FAVORITOS ---
-        function addFavorito() {
-            const input = document.getElementById('input-ruta');
-            const btn = document.getElementById('btn-add-fav');
-            if (input.value.trim() === "") return;
-
-            const nuevaRuta = input.value.trim();
-            favoritos.push(nuevaRuta);
-            localStorage.setItem('fav_routes', JSON.stringify(favoritos));
+        // --- BUSCADOR REAL (Photon API - OpenStreetMap) ---
+        async function buscarLugares(query) {
+            const sug = document.getElementById('sugerencias');
+            if (query.length < 3) { sug.style.display = 'none'; return; }
             
-            // Cambio de color dinámico solicitado (Amarillo -> Verde)
-            btn.classList.add('added');
-            btn.innerHTML = "✓ ¡Añadida!";
-            feedback([20, 50, 20]);
-
-            setTimeout(() => {
-                btn.classList.remove('added');
-                btn.innerHTML = "Añadir Favorita";
-                input.value = "";
-                renderFavoritos();
-            }, 1500);
+            try {
+                const res = await fetch(`https://photon.komoot.io/api/?q=${query}&lat=41.38&lon=2.17&limit=5`);
+                const data = await res.json();
+                
+                sug.innerHTML = data.features.map(f => `
+                    <div class="suggestion-item" onclick="seleccionarLugar('${f.properties.name}', ${f.geometry.coordinates[1]}, ${f.geometry.coordinates[0]})">
+                        <b>${f.properties.name}</b><br><small>${f.properties.city || ''} ${f.properties.street || ''}</small>
+                    </div>
+                `).join('');
+                sug.style.display = 'block';
+            } catch(e) {}
         }
 
-        function eliminarFavorito(index) {
+        function seleccionarLugar(name, lat, lon) {
+            lugarTemporal = { nombre: name, lat, lon };
+            document.getElementById('input-busqueda').value = name;
+            document.getElementById('sugerencias').style.display = 'none';
+            document.getElementById('btn-add-fav').style.display = 'block';
+        }
+
+        function guardarLugarSeleccionado() {
+            const btn = document.getElementById('btn-add-fav');
+            favoritos.push(lugarTemporal);
+            localStorage.setItem('bcn_favs_angel', JSON.stringify(favoritos));
+            btn.style.background = "#28a745"; btn.innerHTML = "✓ ¡Añadido!";
+            feedback([30, 50, 30]);
+            setTimeout(() => {
+                btn.style.display = 'none'; btn.style.background = "#ffcc00"; btn.innerHTML = "Añadir a Favoritos";
+                renderFavoritos();
+            }, 1000);
+        }
+
+        function eliminarFav(index) {
             feedback(40);
             favoritos.splice(index, 1);
-            localStorage.setItem('fav_routes', JSON.stringify(favoritos));
+            localStorage.setItem('bcn_favs_angel', JSON.stringify(favoritos));
             renderFavoritos();
         }
 
         function renderFavoritos() {
-            const container = document.getElementById('lista-favoritos-extra');
+            const container = document.getElementById('lista-favoritos');
             container.innerHTML = favoritos.map((f, i) => `
-                <div class="fav-item">
-                    <span onclick="ir('${f}', 'transit')" style="font-weight:700; cursor:pointer;">📍 ${f}</span>
-                    <button class="btn-delete" onclick="eliminarFavorito(${i})">Eliminar</button>
+                <div class="fav-card">
+                    <div class="fav-header">
+                        <div style="font-weight:800;">📍 ${f.nombre}</div>
+                        <button onclick="eliminarFav(${i})" style="border:none; background:none; color:var(--bicing-red); font-weight:bold; cursor:pointer;">Eliminar</button>
+                    </div>
+                    <div class="transport-modes">
+                        <button class="mode-btn" onclick="abrirRuta(${f.lat}, ${f.lon}, 'bicycling')">🚲</button>
+                        <button class="mode-btn" onclick="abrirRuta(${f.lat}, ${f.lon}, 'transit')">🚇</button>
+                        <button class="mode-btn" onclick="abrirRuta(${f.lat}, ${f.lon}, 'driving')">🚗</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // --- BICING ---
+        function abrirRuta(lat, lon, mode) {
+            feedback(20);
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=${mode}`, '_blank');
+        }
+
+        // --- BICING PRO (AZUL/ROJO) ---
         async function buscarBicing() {
             feedback(20);
             const btn = document.getElementById('btn-buscar');
-            btn.innerHTML = "Buscando...";
+            btn.innerHTML = "Actualizando...";
 
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const { latitude: lat, longitude: lon } = pos.coords;
                 const res = await fetch('https://api.citybik.es/v2/networks/bicing');
                 const data = await res.json();
                 
-                const stations = data.network.stations
-                    .map(s => ({ ...s, dist: Math.hypot(s.latitude-lat, s.longitude-lon) }))
-                    .sort((a,b) => a.dist - b.dist).slice(0, 4);
+                const stations = data.network.stations.map(s => ({
+                    ...s, dist: Math.hypot(s.latitude-lat, s.longitude-lon)
+                })).sort((a,b) => a.dist - b.dist).slice(0, 5);
 
                 renderEstaciones(stations);
                 initMap(lat, lon, stations);
@@ -246,28 +246,54 @@
 
         function renderEstaciones(stations) {
             document.getElementById('resultados-bicing').style.display = 'block';
-            document.getElementById('lista-estaciones').innerHTML = stations.map(s => `
-                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;">
-                    <span><b>${s.name.replace(/^\d+\s*-\s*/, '')}</b></span>
-                    <span>🚲 ${s.free_bikes}</span>
-                </div>
-            `).join('');
+            document.getElementById('lista-estaciones').innerHTML = stations.map(s => {
+                const e = s.extra?.ebikes || 0;
+                const m = Math.max(0, s.free_bikes - e);
+                return `
+                    <div class="station-card">
+                        <div style="flex:1">
+                            <div style="font-weight:800;">${s.name.replace(/^\d+\s*-\s*/, '')}</div>
+                            <div style="margin-top:8px; display:flex; gap:5px;">
+                                <span class="badge badge-elec">⚡ ${e}</span>
+                                <span class="badge badge-mech">⚙️ ${m}</span>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}&travelmode=walking" target="_blank" style="font-size:1.4rem; text-decoration:none;">🚶</a>
+                    </div>`;
+            }).join('');
         }
 
         function initMap(lat, lon, stations) {
             if(map) map.remove();
             map = L.map('map', { zoomControl: false }).setView([lat, lon], 15);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-            L.circleMarker([lat, lon], { color: 'blue', radius: 5 }).addTo(map);
+            L.tileLayer(darkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+            L.circleMarker([lat, lon], { color: '#007bff', radius: 6 }).addTo(map);
 
             stations.forEach(s => {
-                L.marker([s.latitude, s.longitude], { icon: redBikeIcon }) // ICONO BICI ROJA
+                const e = s.extra?.ebikes || 0;
+                const m = Math.max(0, s.free_bikes - e);
+                L.marker([s.latitude, s.longitude], { icon: bikeIcon })
                  .addTo(map)
-                 .bindPopup(`${s.name}<br>Disponibles: ${s.free_bikes}`);
+                 .bindPopup(`
+                    <div style="text-align:center">
+                        <b>${s.name}</b><br>
+                        <span style="color:var(--bicing-blue); font-weight:bold;">⚡ Eléctricas: ${e}</span><br>
+                        <span style="color:var(--bicing-red); font-weight:bold;">⚙️ Mecánicas: ${m}</span>
+                    </div>
+                `);
             });
         }
 
-        // Carga inicial
+        function toggleMap() { feedback(10); document.getElementById('map-container').classList.toggle('open'); setTimeout(() => map.invalidateSize(), 400); }
+
+        function toggleMusic() {
+            const track = document.getElementById('music-track');
+            const btn = document.getElementById('btn-play');
+            if (track.paused) { track.play(); btn.innerHTML = "⏸"; } 
+            else { track.pause(); btn.innerHTML = "▶"; }
+            feedback(15);
+        }
+
         renderFavoritos();
     </script>
 </body>
