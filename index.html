@@ -15,10 +15,10 @@
             --bicing-blue: #00a1df; 
             --bg: #f4f6f8; --card: #ffffff; --text: #1a1a1a; --btn-sec: #f1f1f1;
             --accent-yellow: #ffcc00;
-            /* Colores Modos Transporte */
-            --color-bike: #ff4d4d; /* Rojo vibrante */
-            --color-transit: #ff9f43; /* Naranja vibrante */
-            --color-car: #2ecc71; /* Verde vibrante */
+            /* Nuevos Colores de Transporte Pedidos */
+            --color-bike: #28a745;    /* Verde */
+            --color-transit: #ff9f43; /* Naranja */
+            --color-car: #e30613;     /* Rojo */
         }
         body.dark-mode {
             --bg: #0f0f0f; --card: #1e1e1e; --text: #ffffff; --btn-sec: #333333;
@@ -28,10 +28,10 @@
         body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 120px; color: var(--text); transition: 0.3s; }
         
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 15px; position: relative; overflow: hidden; }
+        .card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 15px; position: relative; }
 
-        /* LÍNEA ROJA SUPERIOR EN FAVORITOS */
-        .fav-card { border-top: 4px solid var(--bicing-red); }
+        /* Tarjeta Favorita con línea roja superior */
+        .fav-card { border-top: 5px solid var(--bicing-red); }
 
         /* NAVEGACIÓN INFERIOR */
         nav { 
@@ -42,8 +42,11 @@
         .nav-link { background: none; border: none; color: var(--text); font-weight: 800; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; opacity: 0.5; }
         .nav-link.active { color: var(--bicing-red); opacity: 1; }
 
-        .btn-main { background: var(--bicing-red); color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Montserrat'; font-size: 1rem; }
-        .btn-toggle-ui { background: #444; color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 0.85rem; }
+        .btn-main { background: var(--bicing-red); color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Montserrat'; }
+        
+        /* Botón Mapa Azul */
+        .btn-blue { background: var(--bicing-blue) !important; color: white; }
+        .btn-toggle-ui { border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 0.85rem; }
 
         /* ESTACIONES */
         .station-card { background: var(--card); border: 1px solid rgba(128,128,128,0.1); border-radius: 16px; padding: 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -51,81 +54,68 @@
         .badge-elec { background: var(--bicing-blue); }
         .badge-mech { background: var(--bicing-red); }
 
-        /* BOTONES DE TRANSPORTE GRANDES */
-        .transport-modes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .mode-btn { 
-            border: none; padding: 15px 5px; border-radius: 15px; color: white; 
-            font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
-        }
-        .mode-btn i { font-size: 1.5rem; }
-        .mode-btn.bike { background: var(--color-bike); box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3); }
-        .mode-btn.transit { background: var(--color-transit); box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3); }
-        .mode-btn.car { background: var(--color-car); box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); }
-        .mode-btn:active { transform: scale(0.95); opacity: 0.9; }
+        /* GRID TRANSPORTES 2+1 */
+        .transport-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .mode-btn { border: none; padding: 15px; border-radius: 15px; color: white; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
+        .mode-btn.bike { background: var(--color-bike); }
+        .mode-btn.transit { background: var(--color-transit); }
+        .mode-btn.car { background: var(--color-car); grid-column: span 2; } /* El coche ocupa toda la fila inferior */
+        .mode-btn:active { transform: scale(0.96); }
 
-        /* CONTENEDORES PLEGABLES */
         .collapsible { height: 0; overflow: hidden; transition: 0.4s ease-in-out; }
         .collapsible.open { height: auto; padding-bottom: 10px; }
         #map-container.open { height: 280px; margin-top: 10px; border: 1px solid #ddd; border-radius: 15px; }
 
-        .search-box input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid #eee; background: var(--card); color: var(--text); font-size: 1rem; outline: none; }
-        .search-box input:focus { border-color: var(--bicing-red); }
-
         .section { display: none; }
         .section.active { display: block; }
-        .theme-toggle { background: var(--card); border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; font-size: 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        .spotify-player { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); width: 92%; background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); padding: 12px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; z-index: 9998; color: white; }
+        .spotify-player { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 92%; background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); padding: 12px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; z-index: 9998; color: white; }
     </style>
 </head>
 <body onclick="iniciarAudioInit()">
 
     <header>
-        <h1 style="font-family:'Montserrat'; margin:0; font-size:1.4rem;">BCN Mobility <span style="color:var(--bicing-red)">PRO</span></h1>
-        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        <h1 style="font-family:'Montserrat'; margin:0; font-size:1.4rem;" onclick="feedback(10)">BCN Mobility <span style="color:var(--bicing-red)">PRO</span></h1>
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" style="background:var(--card); border:none; border-radius:50%; width:45px; height:45px; box-shadow:0 2px 10px rgba(0,0,0,0.1); cursor:pointer; font-size:1.2rem;">🌙</button>
     </header>
 
     <div id="inicio" class="section active">
         <div class="card">
             <h2 style="margin:0 0 15px 0; font-size:1.1rem; font-family:'Montserrat'">🚲 Bicing Cercano</h2>
-            
-            <button id="btn-buscar" class="btn-main" onclick="buscarBicing()">🔍 Buscar Estaciones</button>
+            <button id="btn-buscar" class="btn-main" onclick="feedback(30); buscarBicing()">🔍 Buscar Estaciones</button>
             
             <div id="ui-bicing" style="display:none;">
-                <button id="btn-map-toggle" class="btn-toggle-ui" onclick="toggleUI('map-container', this, '🗺️ Mostrar Mapa', '🔼 Ocultar Mapa')">🗺️ Mostrar Mapa</button>
+                <button id="btn-map-toggle" class="btn-toggle-ui btn-blue" onclick="toggleUI('map-container', this, '🗺️ Mostrar Mapa', '🔼 Ocultar Mapa')">🗺️ Mostrar Mapa</button>
                 <div id="map-container" class="collapsible"><div id="map" style="width:100%; height:100%;"></div></div>
                 
-                <button id="btn-list-toggle" class="btn-toggle-ui" onclick="toggleUI('lista-estaciones', this, '📜 Mostrar Lista', '🔼 Ocultar Lista')">🔼 Ocultar Lista</button>
+                <button id="btn-list-toggle" class="btn-toggle-ui" style="background:#444; color:white;" onclick="toggleUI('lista-estaciones', this, '📜 Mostrar Lista', '🔼 Ocultar Lista')">🔼 Ocultar Lista</button>
                 <div id="lista-estaciones" class="collapsible open"></div>
             </div>
         </div>
 
         <div class="card">
             <h2 style="margin:0 0 10px 0; font-size:1.1rem; font-family:'Montserrat'">⭐ Mis Rutas Favoritas</h2>
-            <div class="search-box">
-                <input type="text" id="input-busqueda" placeholder="Buscar lugar real..." oninput="buscarLugares(this.value)">
-                <div id="sugerencias" style="background:var(--card); border-radius:10px; margin-top:5px; display:none;"></div>
-            </div>
-            <button id="btn-add-fav" class="btn-main" style="background:var(--accent-yellow); color:black; margin-top:10px; display:none;" onclick="guardarLugarSeleccionado()">Añadir a Favoritos</button>
-            <div class="fav-list" id="lista-favoritos" style="margin-top:15px; display:flex; flex-direction:column; gap:12px;"></div>
+            <input type="text" id="input-busqueda" placeholder="Buscar lugar..." oninput="buscarLugares(this.value)" style="width:100%; padding:15px; border-radius:15px; border:2px solid #eee; margin-bottom:10px;">
+            <div id="sugerencias" style="margin-bottom:10px;"></div>
+            <button id="btn-add-fav" class="btn-main" style="background:var(--accent-yellow); color:black; display:none;" onclick="guardarLugarSeleccionado()">Añadir a Favoritos</button>
+            <div id="lista-favoritos" style="margin-top:15px; display:flex; flex-direction:column; gap:12px;"></div>
         </div>
     </div>
 
     <div id="sobremi" class="section">
         <div class="card">
             <h2 style="color:var(--bicing-red); font-family:'Montserrat'; margin-top:0;">Acerca de</h2>
-            <h3 style="font-size:1rem; margin-bottom:10px;">Funcionalidades PRO</h3>
-            <ul style="padding-left:20px; line-height:1.7; font-size:0.95rem;">
-                <li>Control total de Bicing (Eléctricas y Mecánicas).</li>
-                <li>Distancia calculada en metros reales.</li>
-                <li>Interfaz con mapas plegables dinámicos.</li>
-                <li>Rutas favoritas con integración Google Maps.</li>
+            <h3 style="font-size:1rem;">Funcionalidades PRO</h3>
+            <ul style="padding-left:20px; line-height:1.7;">
+                <li>Bicing en tiempo real con distancia en metros.</li>
+                <li>Gestión de rutas favoritas personalizadas.</li>
+                <li>Mapas y listas plegables con un toque.</li>
+                <li>Modo Noche y Feedback háptico total.</li>
             </ul>
             <hr style="opacity:0.1; margin:20px 0;">
-            <h3 style="font-size:1rem; margin-bottom:10px;">Desarrollo</h3>
-            <p style="line-height:1.6;">Esta App ha sido desarrollada por <strong>Ángel</strong>, un joven de 24 años de Barcelona y apasionado por las nuevas tecnologías. Innovando en movilidad urbana.</p>
-            <p style="font-size:0.8rem; color:#888; text-align:center; margin-top:30px;">© 2026 Ángel Dev - Barcelona Tech</p>
+            <h3 style="font-size:1rem;">Desarrollo</h3>
+            <p>App desarrollada por <strong>Ángel</strong>, 24 años, Barcelona. Apasionado por las nuevas tecnologías y la movilidad eficiente.</p>
+            <p style="text-align:center; opacity:0.5; font-size:0.8rem; margin-top:20px;">© 2026 Ángel Dev</p>
         </div>
     </div>
 
@@ -134,34 +124,29 @@
         <button class="nav-link" onclick="showTab('sobremi', this)">ℹ️<br>Acerca de</button>
     </nav>
 
-    <div class="spotify-player">
+    <div class="spotify-player" onclick="feedback(5)">
         <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:30px; height:30px; border-radius:5px; background:linear-gradient(45deg, #e30613, #00a1df);"></div>
-            <div style="font-size:0.7rem;"><b>Lo-Fi BCN</b><br>Mobility Mix</div>
+            <div style="width:30px; height:30px; border-radius:5px; background:linear-gradient(45deg, var(--bicing-red), var(--bicing-blue));"></div>
+            <div style="font-size:0.7rem;"><b>Ángel Mix</b><br>Lo-Fi 2026</div>
         </div>
         <button onclick="toggleMusic()" id="btn-play" style="background:white; border:none; width:30px; height:30px; border-radius:50%;">▶</button>
     </div>
 
     <audio id="music-track" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
-    <audio id="click-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
 
     <script>
         let map = null;
         let darkMode = false;
         let audioIniciado = false;
-        let lugarTemporal = null;
-
-        const defaultFavs = [
+        let favoritos = JSON.parse(localStorage.getItem('bcn_favs_angel_2026')) || [
             { nombre: "Mercabarna", lat: 41.334, lon: 2.119 },
             { nombre: "Fira Barcelona", lat: 41.354, lon: 2.127 }
         ];
-        let favoritos = JSON.parse(localStorage.getItem('bcn_favs_final')) || defaultFavs;
 
         function feedback(v = 15) { if(navigator.vibrate) navigator.vibrate(v); }
-        function iniciarAudioInit() { if(!audioIniciado) { toggleMusic(); audioIniciado = true; } }
 
         function showTab(id, el) {
-            feedback(10);
+            feedback(20);
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -169,78 +154,67 @@
         }
 
         function toggleTheme() {
+            feedback(25);
             darkMode = !darkMode;
             document.body.classList.toggle('dark-mode');
             document.getElementById('theme-btn').innerHTML = darkMode ? '☀️' : '🌙';
-            if(map) {
-                L.tileLayer(darkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-            }
-            feedback(20);
+            if(map) L.tileLayer(darkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
         }
 
-        // --- LÓGICA PLEGABLE ---
-        function toggleUI(containerId, btn, textShow, textHide) {
-            feedback(10);
-            const el = document.getElementById(containerId);
+        function toggleUI(id, btn, tShow, tHide) {
+            feedback(15);
+            const el = document.getElementById(id);
             el.classList.toggle('open');
-            btn.innerHTML = el.classList.contains('open') ? textHide : textShow;
-            if(containerId === 'map-container' && map) setTimeout(() => map.invalidateSize(), 400);
+            btn.innerHTML = el.classList.contains('open') ? tHide : tShow;
+            if(id === 'map-container' && map) setTimeout(() => map.invalidateSize(), 400);
         }
 
-        // --- BUSCADOR ---
-        async function buscarLugares(query) {
-            const sug = document.getElementById('sugerencias');
-            if (query.length < 3) { sug.style.display = 'none'; return; }
-            const res = await fetch(`https://photon.komoot.io/api/?q=${query}&lat=41.38&lon=2.17&limit=5`);
+        async function buscarLugares(q) {
+            if (q.length < 3) return;
+            const res = await fetch(`https://photon.komoot.io/api/?q=${q}&lat=41.38&lon=2.17&limit=3`);
             const data = await res.json();
-            sug.innerHTML = data.features.map(f => `
-                <div style="padding:12px; border-bottom:1px solid #eee; cursor:pointer;" onclick="seleccionarLugar('${f.properties.name}', ${f.geometry.coordinates[1]}, ${f.geometry.coordinates[0]})">
-                    <b>${f.properties.name}</b>
+            document.getElementById('sugerencias').innerHTML = data.features.map(f => `
+                <div style="padding:10px; background:white; border-bottom:1px solid #eee;" onclick="seleccionar('${f.properties.name}',${f.geometry.coordinates[1]},${f.geometry.coordinates[0]})">
+                    📍 ${f.properties.name}
                 </div>`).join('');
-            sug.style.display = 'block';
         }
 
-        function seleccionarLugar(n, lt, ln) {
+        function seleccionar(n, lt, ln) {
+            feedback(10);
             lugarTemporal = { nombre: n, lat: lt, lon: ln };
             document.getElementById('input-busqueda').value = n;
-            document.getElementById('sugerencias').style.display = 'none';
+            document.getElementById('sugerencias').innerHTML = "";
             document.getElementById('btn-add-fav').style.display = 'block';
         }
 
         function guardarLugarSeleccionado() {
+            feedback([20, 50, 20]);
             favoritos.push(lugarTemporal);
-            localStorage.setItem('bcn_favs_final', JSON.stringify(favoritos));
-            renderFavoritos();
+            localStorage.setItem('bcn_favs_angel_2026', JSON.stringify(favoritos));
+            renderFavs();
             document.getElementById('btn-add-fav').style.display = 'none';
             document.getElementById('input-busqueda').value = "";
-            feedback([20, 50, 20]);
         }
 
-        function renderFavoritos() {
+        function renderFavs() {
             const container = document.getElementById('lista-favoritos');
             container.innerHTML = favoritos.map((f, i) => `
                 <div class="card fav-card">
-                    <div style="display:flex; justify-content:space-between;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800;">📍 ${f.nombre}</span>
-                        <span onclick="eliminarFav(${i})" style="color:var(--bicing-red); font-size:0.7rem; font-weight:800; cursor:pointer;">ELIMINAR</span>
+                        <span onclick="feedback(40); favoritos.splice(${i},1); localStorage.setItem('bcn_favs_angel_2026', JSON.stringify(favoritos)); renderFavs();" style="color:var(--bicing-red); font-size:0.7rem; font-weight:800; cursor:pointer;">ELIMINAR</span>
                     </div>
                     <div class="transport-modes">
-                        <button class="mode-btn bike" onclick="ir(${f.lat}, ${f.lon}, 'bicycling')">🚲 Ir en Bici</button>
-                        <button class="mode-btn transit" onclick="ir(${f.lat}, ${f.lon}, 'transit')">🚇 Ir en Metro</button>
-                        <button class="mode-btn car" onclick="ir(${f.lat}, ${f.lon}, 'driving')">🚗 Ir en Coche</button>
+                        <button class="mode-btn bike" onclick="feedback(20); ir(${f.lat},${f.lon},'bicycling')">🚲 Ir en Bici</button>
+                        <button class="mode-btn transit" onclick="feedback(20); ir(${f.lat},${f.lon},'transit')">🚇 Ir en Metro</button>
+                        <button class="mode-btn car" onclick="feedback(20); ir(${f.lat},${f.lon},'driving')">🚗 Ir en Coche</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        function ir(lt, ln, m) { feedback(20); window.open(`https://www.google.com/maps/dir/?api=1&destination=${lt},${ln}&travelmode=${m}`, '_blank'); }
-        function eliminarFav(i) { favoritos.splice(i, 1); localStorage.setItem('bcn_favs_final', JSON.stringify(favoritos)); renderFavoritos(); feedback(40); }
+        function ir(lt, ln, m) { window.open(`https://www.google.com/maps/dir/?api=1&destination=${lt},${ln}&travelmode=${m}`, '_blank'); }
 
-        // --- BICING ---
         async function buscarBicing() {
-            feedback(20);
-            const btn = document.getElementById('btn-buscar');
-            btn.innerHTML = "Localizando...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const { latitude: lat, longitude: lon } = pos.coords;
                 const res = await fetch('https://api.citybik.es/v2/networks/bicing');
@@ -248,49 +222,41 @@
                 const stations = data.network.stations.map(s => ({
                     ...s, d: Math.hypot(s.latitude-lat, s.longitude-lon)
                 })).sort((a,b) => a.d - b.d).slice(0, 5);
-
+                
                 renderEstaciones(stations, lat, lon);
                 initMap(lat, lon, stations);
                 document.getElementById('ui-bicing').style.display = 'block';
-                btn.innerHTML = "🔄 Actualizar Bicing";
             });
         }
 
-        function renderEstaciones(stations, myLat, myLon) {
-            document.getElementById('lista-estaciones').innerHTML = stations.map(s => {
+        function renderEstaciones(sts, myLat, myLon) {
+            document.getElementById('lista-estaciones').innerHTML = sts.map(s => {
                 const e = s.extra?.ebikes || 0;
                 const m = Math.max(0, s.free_bikes - e);
-                const dist = Math.round(calcDist(myLat, myLon, s.latitude, s.longitude) * 1000);
+                const d = Math.round(calcDist(myLat, myLon, s.latitude, s.longitude) * 1000);
                 return `
                     <div class="station-card">
                         <div>
-                            <div style="font-weight:800;">${s.name.replace(/^\d+\s*-\s*/, '')}</div>
-                            <div style="font-size:0.8rem; color:#888;">${dist} metros a pie</div>
+                            <div style="font-weight:800; font-size:0.9rem;">${s.name.replace(/^\d+\s*-\s*/, '')}</div>
+                            <div style="font-size:0.8rem; color:#888;">${d} metros a pie</div>
                             <div style="margin-top:8px; display:flex; gap:8px;">
                                 <span class="badge badge-elec">⚡ ${e}</span>
                                 <span class="badge badge-mech">⚙️ ${m}</span>
                             </div>
                         </div>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}&travelmode=walking" target="_blank" style="font-size:1.5rem; text-decoration:none;">🚶</a>
+                        <span onclick="feedback(20); window.open('https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}&travelmode=walking','_blank')" style="font-size:1.5rem; cursor:pointer;">🚶</span>
                     </div>`;
             }).join('');
         }
 
-        function initMap(lat, lon, stations) {
+        function initMap(lat, lon, sts) {
             if(map) map.remove();
             map = L.map('map', { zoomControl: false }).setView([lat, lon], 15);
             L.tileLayer(darkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-            stations.forEach(s => {
+            sts.forEach(s => {
                 L.marker([s.latitude, s.longitude], { icon: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png', iconSize: [35, 35] }) })
-                 .addTo(map).bindPopup(`<b>${s.name}</b><br><span style="color:var(--bicing-blue)">⚡ Elec: ${s.extra?.ebikes || 0}</span><br><span style="color:var(--bicing-red)">⚙️ Mec: ${s.free_bikes - (s.extra?.ebikes || 0)}</span>`);
+                .addTo(map).bindPopup(`<b>${s.name}</b>`);
             });
-        }
-
-        function toggleMusic() {
-            const track = document.getElementById('music-track');
-            const btn = document.getElementById('btn-play');
-            if (track.paused) { track.play(); btn.innerHTML = "⏸"; } else { track.pause(); btn.innerHTML = "▶"; }
-            feedback(15);
         }
 
         function calcDist(lat1, lon1, lat2, lon2) {
@@ -301,7 +267,16 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        renderFavoritos();
+        function toggleMusic() {
+            feedback(15);
+            const t = document.getElementById('music-track');
+            const b = document.getElementById('btn-play');
+            if (t.paused) { t.play(); b.innerHTML = "⏸"; } else { t.pause(); b.innerHTML = "▶"; }
+        }
+
+        function iniciarAudioInit() { if(!audioIniciado) { toggleMusic(); audioIniciado = true; } }
+
+        renderFavs();
     </script>
 </body>
-</html>
+                </html>
